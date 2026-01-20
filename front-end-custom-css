@@ -1,0 +1,128 @@
+{%- comment -%}
+Shopify Storefront Custom CSS Limitations
+1. Hard Character Limits
+Section-Level: Max 500 characters (spaces/breaks included).
+Theme-Level: Max 1500 characters.
+Note: Code must often be minified to fit; extensive styling should move to theme assets.
+{%- endcomment -%}
+
+/*   Multicolumn Icon Section Homepage   */ 
+.content-container {
+  padding-top: 10px;
+}
+
+/*   Multicolumn itin breakdown   */ 
+/* Make the entire group of columns narrower and centered */
+.multicolumn-list {
+  max-width: 800rem; /* Adjust this value to make the section wider or narrower */
+  margin-left: auto;
+  margin-right: auto;
+} /* Force the background of each column to be white */
+.multicolumn-card__info {
+  background-color: #ffffff;
+  border-color: #000000;
+}
+
+/*   Multicolumn More Days CTA   */
+.content-container {
+  background-color: #000000;
+}
+.multicolumn-card {
+  background-color: #000000;
+}
+.link {
+  color: #ffffff;
+}
+.multicolumn {
+  border-color: #000000;
+}
+.page-width {
+  max-width: 80%;
+  border: 3px solid #0020c2;
+  border-radius: 1px;
+  padding: 2rem;
+}
+.multicolumn-list__item {
+  padding-left: 4rem;
+  padding-right: 2rem;
+}
+.multicolumn-list {
+  justify-content: center;
+  text-align: center;
+}
+
+/*   Multicolumn on PDP 3 Simple Steps section   */
+.h1 {
+  color: #ffffff;
+  background-color: #000000;
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: 0vw;
+  margin-right: 0vw;
+}
+.multicolumn-card__info {
+  color: #000000;
+  text-align: center;
+}
+.button {
+  background-color: #0020c2;
+}
+
+/*   Multicolumn section on PDP Our Promises section   */
+.content-container {
+  border-radius: 10%;
+}
+
+/*   Rich Text Homepage We Made For You Section   */
+.rich-text__heading {
+  color: #0020c2;
+}
+
+/*   Rich Test on product page   */
+.rich-text {
+  background-color: #e9edff;
+}
+.h2 {
+  color: #0020c2;
+}
+
+/*   Product Description Section on product page   */
+.product__description p,
+.product__description h2,
+.product__description h3 {
+  text-align: left !important;
+}
+
+/*   Collapsible Content on PDPs in What's Included section   */
+.h1 {
+  background-color: #000000;
+  color: #ffffff;
+}
+.accordion__title {
+  text-align: left;
+}
+
+/*   FAQ tabs on all PDPs   */
+.accordion__title {
+  text-align: left;
+}
+.faq-tabs__tab-button {
+  text-transform: none;
+}
+
+/*   Image Banner on Home Page with Klaviyo Sign Up   */
+.content-container {
+  opacity: 85%;
+}
+
+/*   Multirow on Paris Day Trip PDP for Why is this different section   */ 
+.image-with-text__media {
+  border-radius: 20px;
+}
+.image-with-text__heading {
+  color: #0020c2;
+}
+.image-with-text__text ul li::marker {
+  color: #0020c2;
+}

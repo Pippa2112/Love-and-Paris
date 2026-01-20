@@ -1,0 +1,458 @@
+{%- comment -%}
+- Custom built but not completed, as it was not needed for the Love and Paris Website
+- Section is functional but not fully styled
+- Section available on storefront editor
+{%- endcomment -%}
+
+{{ 'component-slider.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .tabs-with-content__header {
+    margin-bottom: 3rem;
+  }
+
+  .tabs-with-content__tab-list {
+    display: flex;
+    border-bottom: 1px solid rgba(var(--color-foreground), 0.1);
+    margin-bottom: 3rem;
+  }
+
+  .tabs-with-content__tab-button {
+    font-family: var(--font-heading-family);
+    font-weight: var(--font-heading-weight);
+    font-style: var(--font-heading-style);
+    padding: 1rem 1.5rem;
+    margin-bottom: -1px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: {{ section.settings.inactive_color }};
+    transition: color 0.2s ease, border-color 0.2s ease;
+    text-transform: uppercase;
+    flex-grow: 1; /* Fills the space */
+    text-align: center;
+  }
+
+  .tabs-with-content__tab-button[aria-selected="true"] {
+    color: {{ section.settings.active_color }};
+    border-bottom-color: {{ section.settings.active_color }};
+  }
+
+  .tabs-with-content__tab-panel { display: none; }
+  .tabs-with-content__tab-panel.is-active { display: block; }
+  
+  .tab-panel__content-wrapper {
+    position: relative;
+  }
+
+  .tab-panel__scroll-wrapper {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  .tab-panel__scroll-wrapper::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
+
+  .tab-panel__page {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    display: grid;
+    gap: 2rem;
+  }
+  
+  @media screen and (min-width: 750px) {
+    .tab-panel__page {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .tab-panel__media-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .tab-panel__image-container {
+    overflow: hidden;
+    aspect-ratio: 540 / 360;
+  }
+  
+  .tab-panel__media-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .tab-panel__media-item .h4 {
+    margin: 0;
+    text-align: center;
+  }
+
+  .tab-panel__nav-button {
+    display: none;
+  }
+
+  @media screen and (min-width: 990px) {
+    .tab-panel__nav-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(var(--color-background), 0.75);
+      border: 1px solid rgba(var(--color-foreground), 0.1);
+      border-radius: 50%;
+      width: 4rem;
+      height: 4rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 1;
+    }
+    .tab-panel__nav-button--prev { left: -2rem; }
+    .tab-panel__nav-button--next { right: -2rem; }
+    .tab-panel__nav-button img { width: 1.2rem; height: 1.2rem; }
+  }
+  
+  @media screen and (max-width: 749px) {
+    .tabs-with-content__tab-list {
+      overflow-x: auto;
+      white-space: nowrap;
+      justify-content: flex-start;
+    }
+    .tabs-with-content__tab-button {
+      flex-grow: 0;
+    }
+
+    /* --- MOBILE HORIZONTAL SCROLL STYLES --- */
+    .tab-panel__scroll-wrapper {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: none; /* Allows for free scrolling */
+    }
+
+    .tab-panel__page,
+    .tab-panel__column {
+      display: contents; /* Flattens the structure so media items are direct children */
+    }
+
+    .tab-panel__media-item {
+      flex: 0 0 80%; /* Sets the width of each item */
+      padding-right: 1.5rem; /* Creates a gap between items */
+    }
+  }
+
+  .section-{{ section.id }}-padding .tab-panel__media-item img {
+    object-fit: {{ section.settings.image_fit }};
+  }
+
+  /* --- Layout fixes for Tabs with Content images --- */
+
+/* 1. Remove the fixed aspect ratio to allow images to be their natural height */
+ .section-{{ section.id }}-padding .tab-panel__image-container {
+   aspect-ratio: auto;
+  }
+
+/* 2. Ensure the image scales correctly inside the adaptive container */
+  .section-{{ section.id }}-padding .tab-panel__media-item img {
+    height: auto;
+  }
+
+/* 3. Reduce the gap between the two image columns on desktop */
+@media screen and (min-width: 750px) {
+  .section-{{ section.id }}-padding .tab-panel__page {
+    gap: 1rem; /* You can adjust this value, e.g., 0.5rem for an even smaller gap */
+    }
+  }
+{%- endstyle -%}
+
+<div class="color-{{ section.settings.color_scheme }} section-{{ section.id }}-padding">
+  <div class="page-width">
+    {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+      <div class="tabs-with-content__header center">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="h1">{{ section.settings.heading }}</h2>
+        {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <div class="rte">{{ section.settings.subheading }}</div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <tab-component id="Tabs-{{ section.id }}">
+      <div class="tabs-with-content__nav" role="tablist">
+        {%- for block in section.blocks -%}
+          {%- if block.settings.title != blank -%}
+            <button
+             class="tabs-with-content__nav-button h3"
+              role="tab"
+              aria-selected="{{ forloop.first }}"
+              aria-controls="TabPanel-{{ forloop.index }}-{{ section.id }}"
+              id="Tab-{{ forloop.index }}-{{ section.id }}"
+              tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+            >
+            {{ block.settings.title }}
+            </button>
+          {%- endif -%}
+          {%- endfor -%}
+      </div>
+
+      <div class="tabs-with-content__tab-panels">
+        {%- for block in section.blocks -%}
+          <div
+            class="tabs-with-content__tab-panel{% if forloop.first %} is-active{% endif %}"
+            id="TabPanel-{{ forloop.index }}-{{ section.id }}"
+            role="tabpanel"
+            aria-labelledby="Tab-{{ forloop.index }}-{{ section.id }}"
+            tabindex="0"
+          >
+            <div class="tab-panel__content-wrapper">
+              <div class="tab-panel__scroll-wrapper">
+                {%- for i in (1..5) -%}
+                  {%- liquid
+                    assign image_left_setting = 'image_left_' | append: i
+                    assign image_right_setting = 'image_right_' | append: i
+                    assign title_left_setting = 'title_left_' | append: i
+                    assign title_right_setting = 'title_right_' | append: i
+
+                    assign image_left = block.settings[image_left_setting]
+                    assign image_right = block.settings[image_right_setting]
+                    assign title_left = block.settings[title_left_setting]
+                    assign title_right = block.settings[title_right_setting]
+                  -%}
+                  {%- if image_left != blank or image_right != blank -%}
+                    <div class="tab-panel__page">
+                      <div class="tab-panel__column">
+                        {%- if image_left != blank -%}
+                          <div class="tab-panel__media-item">
+                            <div class="tab-panel__image-container">
+                              <img src="{{ image_left | image_url: width: 540 }}" alt="{{ image_left.alt | escape }}" width="540" loading="lazy">
+                            </div>
+                            {%- if title_left != blank -%}
+                              <h4 class="h4">{{ title_left }}</h4>
+                            {%- endif -%}
+                          </div>
+                        {%- endif -%}
+                      </div>
+                      <div class="tab-panel__column">
+                        {% if image_right != blank %}
+                          <div class="tab-panel__media-item">
+                            <div class="tab-panel__image-container">
+                             <img src="{{ image_right | image_url: width: 540 }}" alt="{{ image_right.alt | escape }}" width="540" loading="lazy">
+                            </div>
+                            {%- if title_right != blank -%}
+                              <h4 class="h4">{{ title_right }}</h4>
+                            {%- endif -%}
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+              <button type="button" class="tab-panel__nav-button tab-panel__nav-button--prev" aria-label="Previous slide">
+                <img src="https://cdn.shopify.com/s/files/1/0899/8649/8935/files/Left.svg?v=1757423673" alt="Left arrow" loading="lazy">
+              </button>
+              <button type="button" class="tab-panel__nav-button tab-panel__nav-button--next" aria-label="Next slide">
+                <img src="https://cdn.shopify.com/s/files/1/0899/8649/8935/files/Right.svg?v=1757423673" alt="Right arrow" loading="lazy">
+              </button>
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    </tab-component>
+  </div>
+</div>
+
+<script>
+  if (!customElements.get('tab-component')) {
+    customElements.define('tab-component', class TabComponent extends HTMLElement {
+      constructor() {
+        super();
+        this.tabs = this.querySelectorAll('[role="tab"]');
+        this.panels = this.querySelectorAll('[role="tabpanel"]');
+        this.tabs.forEach(tab => tab.addEventListener('click', this.onTabClick.bind(this)));
+        
+        this.panels.forEach(panel => {
+          const prevButton = panel.querySelector('.tab-panel__nav-button--prev');
+          const nextButton = panel.querySelector('.tab-panel__nav-button--next');
+          const scrollWrapper = panel.querySelector('.tab-panel__scroll-wrapper');
+          if (prevButton && nextButton && scrollWrapper) {
+            prevButton.addEventListener('click', () => {
+              scrollWrapper.scrollBy({ left: -scrollWrapper.clientWidth, behavior: 'smooth' });
+            });
+            nextButton.addEventListener('click', () => {
+              scrollWrapper.scrollBy({ left: scrollWrapper.clientWidth, behavior: 'smooth' });
+            });
+          }
+        });
+      }
+
+      onTabClick(event) {
+        event.preventDefault();
+        const clickedTab = event.currentTarget;
+        const targetPanelId = clickedTab.getAttribute('aria-controls');
+
+        this.tabs.forEach(tab => {
+          const isSelected = tab === clickedTab;
+          tab.setAttribute('aria-selected', isSelected);
+          tab.setAttribute('tabindex', isSelected ? '0' : '-1');
+        });
+
+        this.panels.forEach(panel => {
+          const isActive = panel.id === targetPanelId;
+          panel.classList.toggle('is-active', isActive);
+        });
+        
+        clickedTab.focus();
+      }
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Tabs with content",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Take a peek inside"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "color",
+      "id": "active_color",
+      "label": "Active tab color",
+      "default": "#D90429"
+    },
+    {
+      "type": "color",
+      "id": "inactive_color",
+      "label": "Inactive tab color",
+      "default": "#777777"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "options": [
+    {
+      "value": "cover",
+      "label": "t:sections.image-with-text.settings.image_fit.options__1.label"
+    },
+    {
+      "value": "contain",
+      "label": "t:sections.image-with-text.settings.image_fit.options__2.label"
+    }
+  ],
+      "default": "cover",
+      "label": "t:sections.image-with-text.settings.image_fit.label",
+      "info": "t:sections.image-with-text.settings.image_fit.info"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Tab",
+      "limit": 10,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tab title",
+          "default": "Tab Title"
+        },
+        { "type": "header", "content": "Content Page 1" },
+        { "type": "image_picker", "id": "image_left_1", "label": "Image Left" },
+        { "type": "text", "id": "title_left_1", "label": "Title Left" },
+        { "type": "image_picker", "id": "image_right_1", "label": "Image Right" },
+        { "type": "text", "id": "title_right_1", "label": "Title Right" },
+        { "type": "header", "content": "Content Page 2" },
+        { "type": "image_picker", "id": "image_left_2", "label": "Image Left" },
+        { "type": "text", "id": "title_left_2", "label": "Title Left" },
+        { "type": "image_picker", "id": "image_right_2", "label": "Image Right" },
+        { "type": "text", "id": "title_right_2", "label": "Title Right" },
+        { "type": "header", "content": "Content Page 3" },
+        { "type": "image_picker", "id": "image_left_3", "label": "Image Left" },
+        { "type": "text", "id": "title_left_3", "label": "Title Left" },
+        { "type": "image_picker", "id": "image_right_3", "label": "Image Right" },
+        { "type": "text", "id": "title_right_3", "label": "Title Right" },
+        { "type": "header", "content": "Content Page 4" },
+        { "type": "image_picker", "id": "image_left_4", "label": "Image Left" },
+        { "type": "text", "id": "title_left_4", "label": "Title Left" },
+        { "type": "image_picker", "id": "image_right_4", "label": "Image Right" },
+        { "type": "text", "id": "title_right_4", "label": "Title Right" },
+        { "type": "header", "content": "Content Page 5" },
+        { "type": "image_picker", "id": "image_left_5", "label": "Image Left" },
+        { "type": "text", "id": "title_left_5", "label": "Title Left" },
+        { "type": "image_picker", "id": "image_right_5", "label": "Image Right" },
+        { "type": "text", "id": "title_right_5", "label": "Title Right" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tabs with content",
+      "blocks": [
+        { "type": "tab", "settings": { "title": "Info PDF" }},
+        { "type": "tab", "settings": { "title": "Day 1 PDF" }}
+      ]
+    }
+  ]
+}
+{% endschema %}
+

@@ -1,0 +1,472 @@
+{%- comment -%}
+Updated multicolumn section: 
+- Adds robust AJAX add-to-cart behavior.
+- Adds "Enable text overlay on image" option.
+- Fixes Mobile Slider "stacking" issue.
+- Fixes Overlay Text "cutoff" issue using CSS Grid.
+- Fixes Mobile 1-Column formatting (Respects Image Aspect Ratio). 
+- Adds Animated Arrow to links using icon-arrow.svg.
+{%- endcomment -%}
+
+{{ 'section-multicolumn.css' | asset_url | stylesheet_tag }}
+{{ 'component-slider.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  .multicolumn-card { display: flex; flex-direction: column; height: 100%; position: relative; }
+  .multicolumn-card__info { flex-grow: 1; padding: 2.5rem; }
+  .multicolumn-card .product-form, .multicolumn-section-buy-button { margin-top: 1.5rem; }
+  .multicolumn-section-buy-button { display: flex; justify-content: center; }
+  .multicolumn-list__item {
+    overflow: hidden; /* This is needed to clip the content to the rounded corners */
+  }
+  .multicolumn-card__image {
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+  }
+  .multicolumn-card__image-wrapper--third-width,
+  .multicolumn-card__image-wrapper--half-width {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Loading Spinner for Buttons */
+  .button.loading {
+    position: relative;
+    pointer-events: none;
+  }
+  .button.loading > span {
+    color: transparent;
+  }
+  .button.loading::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin-left: -0.8rem;
+    margin-top: -0.8rem;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-top-color: rgb(255, 255, 255);
+    border-radius: 50%;
+    animation: button-loading-spinner 1s linear infinite;
+  }
+  @keyframes button-loading-spinner {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* --- LINK ARROW STYLES --- */
+  .animate-arrow .icon-arrow {
+    width: 1.5rem;
+    height: auto;
+    transition: transform 0.2s ease;
+    vertical-align: middle;
+  }
+  .animate-arrow:hover .icon-arrow {
+    transform: translateX(0.25rem);
+  }
+  .icon-wrap {
+    display: inline-block;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  /* --- FIX 1: MOBILE SLIDER SCROLL --- */
+  /* Ensure the slider actually slides and doesn't wrap (stack) on mobile */
+  @media screen and (max-width: 749px) {
+    .slider.slider--tablet-down {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+    .slider.slider--tablet-down .slider__slide {
+      scroll-snap-align: center;
+      flex-shrink: 0 !important;
+    }
+    /* FIX: 1 column width logic. 
+       calc(100vw - 30px) ensures it fits with standard Shopify mobile margins. 
+    */
+    .grid--1-col-tablet-down .slider__slide { 
+      width: calc(100vw - 30px) !important; 
+      max-width: none !important;
+    }
+    .grid--2-col-tablet-down .slider__slide { width: 66vw !important; }
+  }
+
+  /* --- FIX 2: OVERLAY TEXT & LAYOUT --- */
+  {% if section.settings.enable_text_overlay %}
+    .multicolumn-card--overlay {
+      display: grid !important;
+      grid-template-columns: 1fr;
+      /* Row height is determined by the overlap of Image Ratio AND Text Content */
+      grid-template-rows: minmax(min-content, max-content);
+      height: auto;
+      min-height: 100%; 
+    }
+
+    /* 1. The Image Layer */
+    .multicolumn-card--overlay .multicolumn-card__image-wrapper {
+      grid-area: 1 / 1 / 2 / 2;
+      width: 100%;
+      height: 100%;
+      margin: 0 !important; /* Override standard width margins */
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Allow Media to provide Aspect Ratio via padding, OR stretch to fill grid */
+    .multicolumn-card--overlay .media {
+      position: relative; /* Restore relative so padding-bottom works for ratio */
+      width: 100%;
+      height: 100%; /* Stretch if text pushes card taller than ratio */
+      padding-bottom: inherit; /* Respect inline style ratio */
+    }
+    
+    .multicolumn-card--overlay .multicolumn-card__image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute; /* Standard Shopify behavior */
+      top: 0; left: 0;
+    }
+
+    /* Dark Overlay Scrim */
+    .multicolumn-card--overlay .multicolumn-card__image-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* 2. The Content Layer */
+    .multicolumn-card--overlay .multicolumn-card__info {
+      grid-area: 1 / 1 / 2 / 2;
+      z-index: 3; /* Above image and scrim */
+      align-self: center; /* Center vertically */
+      justify-self: center; /* Center horizontally */
+      width: 100%;
+      padding: 1.5rem;
+      background: transparent !important;
+      color: #FFFFFF;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* White Text Overrides */
+    .multicolumn-card--overlay .inline-richtext,
+    .multicolumn-card--overlay .rte, 
+    .multicolumn-card--overlay .rte p,
+    .multicolumn-card--overlay .link {
+      color: #FFFFFF;
+    }
+    
+    /* Ensure arrow is white in overlay mode */
+    .multicolumn-card--overlay .icon-arrow {
+       filter: brightness(0) invert(1);
+    }
+  {% endif %}
+{%- endstyle -%}
+
+{%- liquid
+  assign columns_mobile_int = section.settings.columns_mobile | plus: 0
+  assign show_mobile_slider = false
+  if section.settings.swipe_on_mobile and section.blocks.size > columns_mobile_int
+    assign show_mobile_slider = true
+  endif
+-%}
+
+<div class="multicolumn color-{{ section.settings.color_scheme }} gradient" data-section-id="{{ section.id }}">
+  <div class="page-width section-{{ section.id }}-padding isolate">
+    {%- unless section.settings.title == blank -%}
+      <div class="title-wrapper-with-link title-wrapper--self-padded-mobile title-wrapper--no-top-margin multicolumn__title center">
+        <h2 class="title inline-richtext {{ section.settings.heading_size }}">{{ section.settings.title }}</h2>
+      </div>
+    {%- endunless -%}
+    <div class="slider-mobile-gutter">
+      <ul
+        class="multicolumn-list contains-content-container grid grid--{{ section.settings.columns_mobile }}-col-tablet-down grid--{{ section.settings.columns_desktop }}-col-desktop{% if show_mobile_slider %} slider slider--tablet-down grid--peek{% endif %}"
+        id="Slider-{{ section.id }}"
+        role="list"
+      >
+        {%- liquid
+          assign highest_ratio = 0
+          for block in section.blocks
+            if block.settings.image.aspect_ratio > highest_ratio
+              assign highest_ratio = block.settings.image.aspect_ratio
+            endif
+          endfor
+
+          assign number_of_columns = section.settings.columns_desktop
+          assign number_of_columns_mobile = section.settings.columns_mobile
+          if section.settings.image_width == 'half'
+            assign image_width = 0.5
+          elsif section.settings.image_width == 'third'
+            assign image_width = 0.33
+          else
+            assign image_width = 1
+          endif
+        -%}
+        {% capture sizes %}
+          (min-width: 990px) calc(((100vw - 100px) / {{ number_of_columns }}) * {{ image_width }}),
+          (min-width: 750px) calc(((100vw - 100px) / {{ number_of_columns_mobile }}) * {{ image_width }}),
+          calc((100vw - 30px) / {{ number_of_columns_mobile }})
+        {% endcapture %}
+
+        {%- for block in section.blocks -%}
+          <li
+            id="Slide-{{ section.id }}-{{ forloop.index }}"
+            class="multicolumn-list__item grid__item{% if show_mobile_slider %} slider__slide{% endif %}"
+            {{ block.shopify_attributes }}
+            style="
+              border-radius: {{ section.settings.corner_radius }}px;
+              {% if section.settings.enable_column_borders %}
+                border: {{ section.settings.border_width }}px solid {{ section.settings.border_color }};
+              {% endif %}
+            "
+          >
+            <!-- Overlay Toggle Class -->
+            <div class="multicolumn-card content-container {% if section.settings.enable_text_overlay %}multicolumn-card--overlay{% endif %}">
+              {%- if block.settings.image != blank -%}
+                <div class="multicolumn-card__image-wrapper multicolumn-card__image-wrapper--{{ section.settings.image_width }}-width">
+                  <div
+                    class="media media--transparent media--{{ section.settings.image_ratio }}"
+                    {% if section.settings.image_ratio == 'adapt' and highest_ratio != 0 %}
+                      style="padding-bottom: {{ 1 | divided_by: highest_ratio | times: 100 }}%;"
+                    {% endif %}
+                  >
+                    {{
+                      block.settings.image
+                      | image_url: width: 3200
+                      | image_tag:
+                        widths: '50, 75, 100, 150, 200, 300, 400, 500, 750, 1000',
+                        sizes: sizes,
+                        class: 'multicolumn-card__image'
+                    }}
+                  </div>
+                </div>
+              {%- endif -%}
+              <div class="multicolumn-card__info">
+                {%- if block.settings.title != blank -%}<h3 class="inline-richtext">{{ block.settings.title }}</h3>{%- endif -%}
+                {%- if block.settings.text != blank -%}<div class="rte">{{ block.settings.text }}</div>{%- endif -%}
+                {%- if block.settings.link_label != blank -%}
+                  <a class="link animate-arrow" href="{{ block.settings.link }}">
+                    {{- block.settings.link_label | escape -}}
+                    <span class="icon-wrap">&nbsp;<img src="{{ 'icon-arrow.svg' | asset_url }}" class="icon icon-arrow" alt="" width="20" height="20" loading="lazy"></span>
+                  </a>
+                {%- endif -%}
+                {%- if block.settings.product != blank -%}
+                  {%- assign product = block.settings.product -%}
+                  <div class="product-form">
+                    <div class="product-form__buttons">
+                      <button
+                        type="button"
+                        class="product-form__submit button button--full-width button--primary quick-add__submit"
+                        data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+                        {% if product.selected_or_first_available_variant.available == false %}
+                          disabled
+                        {% endif %}
+                      >
+                        <span>
+                          {%- if product.selected_or_first_available_variant.available -%}
+                            {{ block.settings.button_text | default: 'Add to cart' }}
+                          {%- else -%}
+                            {{ 'products.product.sold_out' | t }}
+                          {%- endif -%}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+      {%- if show_mobile_slider -%}
+        <div class="slider-buttons no-js-hidden">
+          <button type="button" class="slider-button slider-button--prev" name="previous" aria-label="{{ 'general.slider.previous_slide' | t }}">{% render 'icon-caret' %}</button>
+          <div class="slider-counter caption">
+            <span class="slider-counter--current">1</span>
+            <span aria-hidden="true"> / </span>
+            <span class="visually-hidden">{{ 'general.slider.of' | t }}</span>
+            <span class="slider-counter--total">{{ section.blocks.size }}</span>
+          </div>
+          <button type="button" class="slider-button slider-button--next" name="next" aria-label="{{ 'general.slider.next_slide' | t }}">{% render 'icon-caret' %}</button>
+        </div>
+      {%- endif -%}
+    </div>
+    <div class="multicolumn-section-buy-button center">
+      {%- if section.settings.section_product.id != blank -%}
+        {%- assign product = section.settings.section_product -%}
+        <div class="product-form">
+          <div class="product-form__buttons">
+            <button
+              type="button"
+              class="product-form__submit button button--primary quick-add__submit"
+              data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+            >
+              <span>{{ section.settings.button_label | default: 'Add to cart' }}</span>
+            </button>
+          </div>
+        </div>
+      {%- elsif section.settings.button_label != blank -%}
+        <a class="button button--primary" href="{{ section.settings.button_link }}">
+          {{ section.settings.button_label | escape }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const quickAddButtons = document.querySelectorAll('.quick-add__submit');
+
+  if (document.body.hasAttribute('data-multicolumn-quick-add-initialized')) {
+    return;
+  }
+  document.body.setAttribute('data-multicolumn-quick-add-initialized', 'true');
+
+  async function handleQuickAdd(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const submitButton = event.currentTarget;
+    const variantId = submitButton.dataset.variantId;
+    if (!variantId) return;
+
+    submitButton.setAttribute('disabled', 'true');
+    submitButton.classList.add('loading');
+
+    const sectionsToRender = ['cart-drawer', 'cart-icon-bubble'].join(',');
+
+    try {
+      const response = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          id: variantId,
+          quantity: 1,
+          sections: sectionsToRender,
+          sections_url: window.location.pathname
+        })
+      });
+
+      const data = await response.json();
+      if (response.status !== 200) {
+        throw new Error(data.description || data.message || 'Error adding item.');
+      }
+      
+      const oldCartDrawer = document.querySelector('cart-drawer');
+      if (oldCartDrawer && data.sections && data.sections['cart-drawer']) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = data.sections['cart-drawer'];
+        const newCartDrawer = tempDiv.querySelector('cart-drawer');
+        if (newCartDrawer) {
+          oldCartDrawer.replaceWith(newCartDrawer);
+        }
+      }
+
+      const oldCartIconBubble = document.getElementById('cart-icon-bubble');
+      if (oldCartIconBubble && data.sections && data.sections['cart-icon-bubble']) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = data.sections['cart-icon-bubble'];
+        const newCartIconBubble = tempDiv.querySelector('#cart-icon-bubble');
+        if (newCartIconBubble) {
+          oldCartIconBubble.replaceWith(newCartIconBubble);
+        }
+      }
+
+      const finalCartDrawer = document.querySelector('cart-drawer');
+      if (finalCartDrawer && typeof finalCartDrawer.open === 'function') {
+        finalCartDrawer.open();
+      }
+
+    } catch (error) {
+      console.error('Failed to add item to cart:', error);
+    } finally {
+      submitButton.removeAttribute('disabled');
+      submitButton.classList.remove('loading');
+    }
+  }
+
+  quickAddButtons.forEach(button => {
+    button.addEventListener('click', handleQuickAdd);
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Multicolumn",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "inline_richtext", "id": "title", "default": "Multicolumn", "label": "Heading" },
+    { "type": "select", "id": "heading_size", "options": [ { "value": "h2", "label": "Small" }, { "value": "h1", "label": "Medium" }, { "value": "h0", "label": "Large" } ], "default": "h1", "label": "Heading size" },
+    { "type": "header", "content": "Visual Style" },
+    { "type": "checkbox", "id": "enable_text_overlay", "default": false, "label": "Enable text overlay on image", "info": "Positions text over the image with a dark background for readability." },
+    { "type": "select", "id": "image_width", "options": [ { "value": "third", "label": "Third" }, { "value": "half", "label": "Half" }, { "value": "full", "label": "Full width of column" } ], "default": "full", "label": "Image width" },
+    { "type": "select", "id": "image_ratio", "options": [ { "value": "adapt", "label": "Adapt to image" }, { "value": "portrait", "label": "Portrait" }, { "value": "square", "label": "Square" } ], "default": "adapt", "label": "Image ratio" },
+    { "type": "range", "id": "columns_desktop", "min": 1, "max": 6, "step": 1, "default": 3, "label": "Number of columns on desktop" },
+    { "type": "select", "id": "column_alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" } ], "default": "left", "label": "Column alignment" },
+    { "type": "select", "id": "background_style", "options": [ { "value": "none", "label": "None" }, { "value": "primary", "label": "Primary" } ], "default": "primary", "label": "Secondary background" },
+    { "type": "header", "content": "Column Styling" },
+    { "type": "checkbox", "id": "enable_column_borders", "label": "Show border around each column", "default": true },
+    { "type": "range", "id": "border_width", "min": 1, "max": 10, "step": 1, "unit": "px", "label": "Border width", "default": 1 },
+    { "type": "color", "id": "border_color", "label": "Border color", "default": "#000000" },
+    { "type": "range", "id": "corner_radius", "min": 0, "max": 50, "step": 5, "unit": "px", "label": "Corner radius", "default": 20 },
+    { "type": "header", "content": "Section Button" },
+    { "type": "product", "id": "section_product", "label": "Buy button product" },
+    { "type": "text", "id": "button_label", "label": "Button label" },
+    { "type": "url", "id": "button_link", "label": "Button link" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+    { "type": "header", "content": "Mobile Layout" },
+    { "type": "select", "id": "columns_mobile", "options": [ { "value": "1", "label": "1 column" }, { "value": "2", "label": "2 columns" } ], "default": "1", "label": "Number of columns on mobile" },
+    { "type": "checkbox", "id": "swipe_on_mobile", "default": false, "label": "Enable swipe on mobile" },
+    { "type": "header", "content": "Section Padding" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Top padding", "default": 36 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Bottom padding", "default": 36 }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Column",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "inline_richtext", "id": "title", "label": "Heading" },
+        { "type": "richtext", "id": "text", "label": "Description" },
+        { "type": "text", "id": "link_label", "label": "Link label" },
+        { "type": "url", "id": "link", "label": "Link" },
+        { "type": "header", "content": "Add to Cart Button" },
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "text", "id": "button_text", "label": "Button text", "default": "Add to cart" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Multicolumn", "blocks": [ { "type": "column" }, { "type": "column" }, { "type": "column" } ] }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,4 @@
+/*   This file highlights the different custom liquid sections and what their code is used for   */ 
+
+/*   Custom liquid used for link anchors   */
+<div id="notion-section" style="display: block; position: relative; top: -100px; visibility: hidden;">&nbsp;</div>

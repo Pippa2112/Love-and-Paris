@@ -1,8 +1,8 @@
-# Love and London/Paris Shopify Website Guide
+# Love and Paris Shopify Website Guide
 
 ## Overview
 
-This document serves as a guide for the updated website files for the Love and London/Paris Shopify websites. This repository includes all files that have been added, updated, or changed.
+This document serves as a guide for the updated website files for the Love and Paris Shopify websites. This repository includes all files that have been added, updated, or changed.
 
 While this repository holds the code, the notes below are designed to help you understand what you are looking at within the Shopify Theme Editor and the code files themselves.
 
